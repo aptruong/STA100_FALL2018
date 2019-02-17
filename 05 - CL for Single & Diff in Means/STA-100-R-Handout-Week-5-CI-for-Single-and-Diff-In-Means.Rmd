@@ -1,0 +1,70 @@
+---
+title: "STA-100 CI for Single and Difference in Means"
+author: "Erin K. Melcon"
+output: html_document
+---
+
+For this handout, we will be using the built in dataset `cars`.  You can view it by typing `cars` into your R console.  For your homework, you will of course need to first load in the proper dataset.
+
+## 1. Confidence intervals for a single mean.
+The function `t.test` in R will give confidence intervals for a single mean, and expects a column of your dataset, and a specification of what confidence level you want as the argument `conf.level` (which should be 0.90, 0.95, or 0.99, or in general (1-$alpha$)).
+
+To get a 95\% confidence interval for car speed, I could use the following commands (I will use inline code to make it look prettier):
+
+```{r}
+the.stuff = t.test(cars$speed, conf.level = 0.95)
+```
+You would replace `cars` with the name of your dataset, and `speed` with the name of your numeric column.
+
+The function `t.test` actually calculates many things, most of which we are not using right now (but will later).  To access the confidence interval, we can use the command `the.stuff$conf.int`: 
+```{r}
+the.stuff$conf.int
+```
+As you can see, the default way of printing is not very nice.  But I can accesss the lower and upper bound for my confidence interval with `the.stuff$conf.int[1]` and `the.stuff$conf.int[2]` respectively:
+
+```{r}
+my.CI = round(the.stuff$conf.int,digits = 4)
+lower.bound = my.CI[1]
+upper.bound = my.CI[2]
+lower.bound
+upper.bound
+```
+
+
+### 2. Confidence interval for independent samples
+
+**Note:  R uses alphabetical order to find the differences in two groups, so if you have group names Cat and Dog R will default to doing Cat-Dog**
+
+The following data is on the body weight of male and female cats.  The first column holds the grouping variable (F or M), and the second holds the numerical values (the body weight of the cats). 
+```{r}
+library(MASS)
+head(cats)
+```
+
+The general format for finding a confidence interval for the difference in two means is:
+
+`the.stuff = t.test(numericcolumnname ~ groupcolumnname, data = datasetname, conf.level = 1-alpha)  `
+`the.stuff$conf.int`
+
+You would have to fill in the values for the numeric colum name, group column name, dataset name, and what alpha you want.
+
+We still use the function `t.test`, but now we have to let `R` know that the format is different.  To get a 99 percent confidence interval for the difference in the two means, we would do: 
+```{r}
+the.stuff = t.test(Bwt ~ Sex, data = cats, conf.level = 0.99)
+```
+`Bwt` would be replaced with your numeric column name, `Sex` by your group column name, and `cats` with your dataset name.  you can also change conf.level to whatever level of confidence you want (0.95 would be 95%, 0.90 would be 90%, etc).
+
+Again, we can access the lower bound and upper bound by
+```{r}
+lower.bound =  the.stuff$conf.int[1]
+upper.bound =  the.stuff$conf.int[2]
+```
+If we wanted to round to only 4 digits, we could also do that by:
+```{r}
+the.CI = round(the.stuff$conf.int,digits = 4)
+the.CI[1]
+the.CI[2]
+```
+
+Since R uses alphabetical ordering for the names, this is (the mean for Female cats) - (the mean for Male cats).
+
