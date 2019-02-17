@@ -1,0 +1,177 @@
+---
+title: "STA 100 R Handout - ANOVA Bonferroni CI, Proportions"
+author: "Erin K. Melcon"
+output: 
+  html_document: 
+    keep_md: yes
+---
+# Calculating the $t_{\alpha/(2k)}$ value
+To calculate the value of $t_{\alpha/(2k)}$ using R, you may use the following command:
+`qt(1-alpha/(2*k), df = n. - I)`
+Where you have to input the values of `alpha`, `k`, `n.`, and `I`.  
+
+For example, say I wanted a family/simultaneous/overall confidence level of 99\%, I was making 6 confidence intervals total, n. =100, and I = 4.
+
+The value of $t_{\alpha/(2k)}$ would be:
+```{r}
+qt(1-0.01/(2*6),100-4)
+```
+
+Make sure that you have the parenthesis in the correct place (as they are above).
+
+### 1. The data
+For this handout, I will use a built in dataset that is already in R (so you do not have to load a dataset to use this handout).  For your homework, you will read in the data as we usually do.
+
+The dataset is called `PlantGrowth`, and you can learn about it by typing `?PlantGrowth` into R.  the names of `PlantGrowth` are:
+```{r}
+names(PlantGrowth)
+```
+The column `weight` is numeric, while the column `group` is a categorical value.  `weight` represents the weight in ounces of plants, and `group` has values `ctrl` (control), `trt1` (treatment 1), and `trt2` (treatment 2).
+
+The goal is to use ANOVA to see if the group means are different, and then find which were different using Bonferroni confidence intervals.
+
+###1. Installing a new package
+For Bonferroni confidence intervals, we have to install a new package called `asbio`.  There are a number of ways to do this, and especially if you have a MAC, you may have to try one or two.
+
+### 1.1. Giving R the code
+If you type in your console (once) the following: `install.packages("asbio")` you should get a prompt that says that R would like to install some things.  Press yes.  Now it should be installed.
+
+### 1.2. Using the drop down menus
+You can also use the menu in Rstudio to install the package, by going 
+
+Tools -> Install Packages 
+
+and then typing `asbio` into the prompt.  Note, for MACs this will be slightly different, but the same idea.
+
+### 1.3.  If you have a MAC and are having trouble. 
+If you are having trouble, specifically with the `tcltk` package, **you may have to install a program called Xquartz**:
+
+https://www.xquartz.org/
+
+Here is a link which describes someones experience with this problem:
+
+http://stackoverflow.com/questions/26511913/installing-using-the-asbio-package-under-os-x
+
+So if you have a MAC and you are having problems, first install Xquartz, then try re-installing the package.  
+
+If the above doesn't help, feel free to email me.
+
+### 2. Load the package
+To use all the things in the new package we installed, in our code block we must now put 
+```{r}
+library(asbio)
+```
+(Note, you have to install the package first using the above, and then do this step).
+
+Now, we are ready to use a function that will calculate Bonferroni Confidence intervals for us!
+
+### 3. Bonferroni Confidence intervals
+There is now a function in r called `bonfCI`.  You give it the **columns** of your dataset, not just the name of the columns, and the level of confidence you want.  The general form is:
+
+`bonfCI(datasetname$numericcolumnname, datasetname$groupcolumnname,conf.level = 1-alpha)`
+
+So for my data, I would do the following:
+```{r}
+library(asbio)
+bonfCI(PlantGrowth$weight,PlantGrowth$group,conf.level = 0.95)
+```
+
+And it will display all the confidence intervals we would want.  It gives the following, in order, for each row:  
+1. The difference it calculated  
+2. The value of ($\bar{y}_a - \bar{y}_b$).  
+3. The lower bound of the confidence interval.  
+4. The upper bound of the confidence interval.  
+5. The decision on whether or not to reject H0 or fail to reject (FTR) H0.  
+6. The associated p-value for the hypothesis test $\mu_a= \mu_b$  
+
+Notice for my data, we only rejected the hypothesis that the two treatment groups had equal means.
+
+### 4.1 Assessing normality of the errors (QQ plot):
+To check the normality assumption, first we need to find the vector of residuals or errors (the values of $e_{ij}$).
+First we save the ANOVA model, and then extract the residuals:
+```{r}
+the.model = lm(weight~group, data = PlantGrowth)
+eij = the.model$residuals
+```
+Now, we can check to see with a QQ plot if the errors look approximately normally distributed:
+```{r}
+qqnorm(eij)
+qqline(eij)
+```
+
+Note that "weight" should be the name of your numeric column, "group" should be the name of your grouping column, and "PlantGrowth" should be the name of your dataset.
+
+### 4.2  Testing for normality (Shapiro-Wilks)
+In addition to assessing normality, we can test for normality.  The null hypothesis is:
+
+$$H_0: \text{The errors are normaly distributed}$$ vs $$H_A: \text{The errors are not normally distributed}$$
+
+Thus, if we reject the null we conclude that the normality of errors assumption has been violated.  The specific test we will use is called the Shaprio-Wilk test for normality.
+
+To find the test-statistic and p-value, we can use the function `shapiro.test`:
+```{r}
+shapiro.test(eij)
+```
+In this case, the p-value is much larger than any reasonable alpha, so we fail to reject the null.  In other words, we conclude the errors are approximately normally distributed.
+
+## Categorical Data
+
+**Note, the following is adding data to R, you do not need to do this step.  You will read in the data from a .csv or .txt as usual**
+```{r,echo = TRUE}
+trees = data.frame(species = rep(c("native","non"),times = c(54,12)))
+squash = data.frame(color = rep(c("white","yellow","green"),times = c(155,40,10)))
+```
+`trees` is a random sample of trees, which were identified as native or non-native.
+`squash` is a random sample of squash, which were identified by color.
+
+Notice the format of the data `trees` is that it has two categories contained in one column, and `squash` has three categories contained in one column.
+
+### 5. Making a frequency table
+
+For all of the following functions, they expect to be given a **frequency table** (a table with the possible categories, and the associated counts or frequencies for each category).  To make a frequency table, we give the function `table` one or more columns of our dataset.
+
+#### 5.1. A one row frequency table
+To make a one row (single categorical variable) frequency table, you use `table` on one column of your dataset:
+
+```{r}
+tree.table = table(trees$species)
+tree.table
+```
+For the squash data, the table of counts would be:
+```{r}
+squash.table = table(squash$color)
+squash.table
+```
+
+
+To access the $i^{th}$ value in the table, you may use the command 
+
+table.name[i] 
+
+where you put in a number 1, 2, ... , k in for i, and what you called your table for table.name.  From this table, we can tell that
+
+```{r}
+tree.table[1]
+```
+trees are a native species.  R assigns the catories by column in alphabetical order.
+
+### 6. Confidence interval for a proportion:
+To make a Wilson-Adjusted confidence interval for a single proportion, we need the proportion of subjects with the trait, and the total sample size.  The rest can be done in R.
+
+To get the total number of subjects with the trait, we use whatever value from our table is appropriate.  Lets say I would like a confidence interval for the proportion of native trees.  Since the native column is in the first column (due to alphabetical ordering), I would make
+
+```{r}
+y = tree.table[1]
+```
+For the total sample size, I want to sum up the table, which can be done through the following command:
+
+```{r}
+n = sum(tree.table)
+```
+
+Now, to find the corrected (although not Wilson corrected) confidence interval for a single proportion, the format is:
+```{r}
+prop.test(y+2,n+4,conf.level = 0.95,correct = FALSE)$conf.int
+```
+
+This gives the lower and upper bound of my confidence interval, as well as the confidence level.  You have to set what y and n are equal to, and then make sure to add the correction to R, and make sure that you set correct=FALSE (or else R will do a different correction).   You can change the confidence level by changing 0.95 to something else.
