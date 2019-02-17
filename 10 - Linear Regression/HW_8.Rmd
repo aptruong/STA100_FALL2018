@@ -1,0 +1,75 @@
+---
+title: "HW#8 (fitness)"
+author: "April Truong"
+date: "February 16, 2019"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Online you will find the file Fitness.csv, which containsthe following columns:
+Column 1:Tread:  The typical amount of time training at high intensity on the treadmill (X).  
+Column 2:Run:  The time it took to complete a 10 kilo-meter run (in minutes) (Y).   
+It is suspected that the amount of high-intensity trainingmay effect the time it took to complete a 10 kilometer run.  
+
+## read data
+```{r}
+library("MASS")
+Fitness <- read.csv("C:/Users/Apple/Downloads/R Files/Fitness.csv")
+head(Fitness)
+names(Fitness)
+```
+
+##(Ia) estimated intercept of the regression line
+```{r}
+plot(Fitness$Tread,Fitness$Run,xlab = "Tread", ylab = "Run (mins)",main = "Relationship Between Tread and Run")
+lin.model = lm(Run ~ Tread, data = Fitness)
+the.betas = lin.model$coefficients
+s.e = summary(lin.model)$sigma
+r.2 =summary(lin.model)$r.squared 
+abline(the.betas)
+the.betas[1]
+```
+>59.92112 
+
+##(Ib) estimated slope of the regression line
+```{r}
+the.betas[2]
+```
+>-1.960135 
+
+##(Ic) lower bound for the 95% CI for the slope
+```{r}
+confint(lin.model,level = 0.95)
+```
+>look at tread, it's slope
+>-2.624957
+
+##(Id) upper bound for the 95% CI for the slope
+>-1.295313
+
+##(Ie) find value of se
+```{r}
+s.e
+```
+>1.920929
+
+##(If) find value of r^2
+```{r}
+r.2
+```
+>0.6806758
+
+##(Ig) does assumption of normality of the error terms appear to hold?
+```{r}
+ei = lin.model$residuals
+qqnorm(ei)
+qqline(ei)
+shapiro.test(ei)
+```
+
+##(Ih) does interval suggest a sig lin rel?
