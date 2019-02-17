@@ -1,0 +1,153 @@
+---
+title: "STA-100-R-Handout-3:  QQ plots and Empirical Rule"
+author: "Erin K. Melcon"
+output: 
+  html_document: 
+    keep_md: yes
+---
+**You will have to change the name of the dataset, and the name of the columns from what is used in this handout.**
+
+For this handout, we will be using the built in dataset `cars`.  You can view it by typing `cars` into your R console.  For your homework, you will of course need to first load in the proper dataset.
+
+
+## 1. QQ-Plot or Normal Probability Plot
+Another way to check normality is to plot the QQ plot.  This is very easy in R, and we use the functions `qqnorm` and `qqline``, which both expect a column in the dataset.
+
+
+```r
+qqnorm(cars$speed,main = "Normal Probability Plot for Car Speed")
+qqline(cars$speed)
+```
+
+![](STA-100-R-Handout-Week-3-QQ-plots_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
+
+You would replace `cars` with your dataset name, and `speed` with whatever column you are interested in.
+
+Again, this data appears to be approximately normal because it is following the red reference line very closely.
+
+An example of a non-normal plot would be as follows (using a different built in dataset)
+
+
+```r
+qqnorm(USArrests$Assault,main = "Normal Probability Plot for Murder Rate")
+qqline(USArrests$Assault)
+```
+
+![](STA-100-R-Handout-Week-3-QQ-plots_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
+Notice there are many points that do not fall on the line, in the middle of the plot as well as the ends.
+
+### 2. Calculating proportions of data between 1, 2, or 3 standard deviations from the mean.
+
+For this part of the handout, we will want to save two things:  The mean, and the standard deviation.  Then, we will find what proportion of the data lies within 1 standard deviation from the mean.
+
+**You will only need to change the name of the dataset, and the column name. All other code should remain the same.**
+
+To find the proportion of datapoints that are 1 standard deviation from the mean:
+
+```r
+X = cars$speed
+the.mean = mean(X)
+the.sd = sd(X)
+one.sd.away = mean(X < the.mean + the.sd & X > the.mean - the.sd)
+one.sd.away
+```
+
+```
+## [1] 0.68
+```
+The first line is saving the numbers corresponding to the speed of the cars (the column `speed` in the dataset `cars`) to a variable X.  Then we can calculate the mean and standard deviation while referring to X.  Then, the next line calculates the proportion.  **You will only need to change the name of the dataset and column in the command for X**
+
+Similarly, we can also caluclate two standard deviations away:
+
+```r
+X = cars$speed
+the.mean = mean(X)
+the.sd = sd(X)
+two.sd.away = mean(X < the.mean + 2*the.sd & X > the.mean - 2*the.sd)
+two.sd.away
+```
+
+```
+## [1] 0.96
+```
+
+or three standard deviations away:
+
+```r
+X = cars$speed
+the.mean = mean(X)
+the.sd = sd(X)
+three.sd.away = mean(X < the.mean + 3*the.sd & X > the.mean - 3*the.sd)
+three.sd.away
+```
+
+```
+## [1] 1
+```
+
+Notice these proportions approximately match what is stated by the Empirical Rule, which suggests the data is approximately normal.
+
+### Extra Info for Those Interested
+This section is not necessary to complete the homework, and is only for those more interested in how the above commands work.
+
+For those interested, the commands that look similar to 
+
+`two.sd.away = mean(X < the.mean + 2*the.sd & X > the.mean - 2*the.sd)`
+
+Are asking R to count how many of the values in X are both less than (`the.mean + 2`the.sd`) (two standard deviations above the mean), and larger than (`the.mean + 2`the.sd`) (two standard deviations below the mean), then divide that by the total number of observations.  
+
+To see step-by-step what R does for these commands, it is helpful to view the results one at a time:
+
+
+```r
+the.mean + 2*the.sd
+```
+
+```
+## [1] 25.97529
+```
+
+This gives the value $\bar{y} + 2*s$,
+
+
+```r
+X < the.mean + 2*the.sd
+```
+
+```
+##  [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+## [15] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+## [29] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+## [43] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+```
+This gives a list of $n$ values, where the value is TRUE if the corresponding data point in $X$ was less than $\bar{y} + 2*s$, and FALSE otherwise. 
+
+Putting the two commands for $\bar{y} + 2*s$ and $\bar{y} - 2*s$ togeather gives:
+
+
+```r
+X < the.mean + 2*the.sd & X > the.mean - 2*the.sd
+```
+
+```
+##  [1] FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+## [12]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+## [23]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+## [34]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+## [45]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+```
+
+Notice that this checks BOTH if $X$ was less than $\bar{y} + 2*s$, and if $X$ was greater than $\bar{y} - 2*s$.
+
+Finally, using the function `mean` on a vector of TRUE's and FALSE's causes R to treat TRUE as 1, and FALSE as 0.  So the mean of 1's and 0's would be counting how many observations fall within two standard deviations from the mean, and then dividing by $n$. 
+
+
+```r
+mean(X < the.mean + 2*the.sd & X > the.mean - 2*the.sd)
+```
+
+```
+## [1] 0.96
+```
+
