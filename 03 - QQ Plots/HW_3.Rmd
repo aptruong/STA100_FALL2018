@@ -1,0 +1,78 @@
+---
+title: "Untitled"
+author: "April Truong"
+date: "February 16, 2019"
+output: 
+  html_document: 
+    keep_md: yes
+    theme: cerulean
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Online you will find the filestudent.csv. It containsinformation on 1548 introduction to statistics students,and has the following columns:
+Column 1:height:  The height of the student.  
+Column 2:hsGPA: The high school GPA of the student.  
+Column 3:pulse:  The pulse rate of the student whenmeasured in class.  
+
+#read data
+```{r}
+student <- readr::read_csv("C:/Users/Apple/Downloads/R Files/student.csv")
+library(tidyverse)
+```
+
+#(a) Plot a QQ plot (normal probability plot) of students heights
+```{r}
+colnames(student)
+
+qqnorm(student$height, main = "Normal Probability Plot for Student Height")
+qqline(student$height)
+```
+> yes  
+
+#(b) Plot a QQ plot (normal probability plot) for students pulse.
+```{r}
+qqnorm(student$pulse,main = "Normal Probability Plot for Student Pulse")
+qqline(student$pulse)
+```
+> no
+
+#(c) Plot a QQ plot (normal probability plot) for highschool GPA.
+```{r}
+qqnorm(student$hsGPA,main = "Normal Probability Plot for Student Hs GPA")
+qqline(student$hsGPA)
+```
+>no
+
+#(d) What proportion of the data for students height lies within one standard deviation from the mean?
+```{r}
+X = student$height
+the.mean = mean(X)
+the.sd = sd(X)
+one.sd.away = mean(X < the.mean + the.sd & X > the.mean - the.sd)
+one.sd.away
+```
+>73.5%
+
+#(e) What proportion of the data for students pulse lies within two standard deviation from the mean?
+```{r}
+X = student$pulse
+the.mean = mean(X)
+the.sd = sd(X)
+two.sd.away = mean(X < the.mean + 2*the.sd & X > the.mean - 2*the.sd)
+two.sd.away
+```
+>96%
+
+#(f) What proportion of the data for highschool GPA lies within three standard deviation from the mean?
+```{r}
+X = student$hsGPA
+the.mean = mean(X)
+the.sd = sd(X)
+three.sd.away = mean(X < the.mean + 3*the.sd & X > the.mean - 3*the.sd)
+three.sd.away 
+```
+>0.985
+
