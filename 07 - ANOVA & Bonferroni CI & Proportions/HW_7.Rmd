@@ -1,0 +1,101 @@
+---
+title: "HW#7 (beans & blood)"
+author: "April Truong"
+date: "February 16, 2019"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#I. Biologists wanted to know if a particular parasite (wee-vils) had a preference for a particular bean plant. The results are stored inbeans.csv, where  the  result was which plant the weevil preferred (Pinto,Cowpea,Navy,Northern). Use this data and R, and assume the claim is that weevils are equally likely to select all bean plants.
+
+## read data
+```{r}
+beans <- read.csv("C:/Users/Apple/Downloads/R Files/beans.csv")
+```
+
+##(Ia) Find t-s
+```{r}
+beans.table = table(beans$plant)
+beans.table
+the.test = chisq.test(beans.table,p = c(1/4,1/4,1/4,1/4),correct = FALSE)
+the.test$statistic
+```
+> 8.179567 
+
+##(Ib) Find p-val
+
+```{r}
+the.test$p.value
+```
+>0.04244278
+
+##(Ic) Reject or fail null (if a=0.05)
+> p-val(0.04)<a(0.05) --> REJECT 
+
+##(Id) Which did weevils prefer more than expected (if null true)
+```{r}
+the.test$expected
+beans.table-the.test$expected
+the.test$residuals^2
+```
+>northern
+
+##(Ie) category contributed most to t-s
+```{r}
+beans.table-the.test$expected
+the.test$residuals^2
+```
+>northern
+
+
+#II. On Canvas you will find the fileblood.csv, which has two columns: Type(for blood type), and Disease(eitheryes or no), which is data taken from a random samplefrom a particular area. Use R and this data to answerthe following questions:
+
+##read data
+```{r}
+blood <- read.csv("C:/Users/Apple/Downloads/R Files/blood.csv")
+```
+
+##(IIa) null
+> H0: p(disease|A)=p(disease|B)=p(disease|AB)=p(disease|O)
+
+##(IIb) alt
+
+
+##(IIc) t-s
+```{r}
+two.cat = table(blood$Disease,blood$Type)
+two.cat
+disease.type.table = table(blood$Disease,blood$Type)
+another.test = chisq.test(disease.type.table,correct = FALSE)
+another.test$statistic
+```
+>19.663
+
+##(IId) p-val
+```{r}
+another.test$p.value
+```
+>0.000199345
+
+##(IIe) Conclusion (a=0.01)
+>p-val(0.00)<a(0.01) --> REJECT (not independent)
+
+##(IIf) blood type A more or less likely to have disease (if null true)
+```{r}
+another.test$observed - another.test$expected
+another.test$residuals^2
+```
+>(-)=less than expected, (+)=more than expected
+>more likely
+
+##(IIg) blood type O
+>less likely
+
+##(IIh) group contributed most to t-s
+>group O blood, yes
+
